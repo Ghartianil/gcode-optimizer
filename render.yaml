@@ -2,9 +2,25 @@ services:
   - type: web
     name: gcode-optimizer
     env: python
-    region: oregon        # or your region
+    region: oregon
     plan: free
-    pythonVersion: 3.10.12
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+    pythonVersion: 3.10.12    # keep your pin here
+    # Temporarily override buildCommand to add debugging steps:
+    buildCommand: |
+      echo "=== Debug: listing root directory ==="
+      ls -la .
+      echo "=== Debug: show runtime.txt content ==="
+      if [ -f runtime.txt ]; then cat runtime.txt; else echo "runtime.txt NOT found"; fi
+      echo "=== Debug: environment PYTHON_VERSION var ==="
+      echo "PYTHON_VERSION=$PYTHON_VERSION"
+      echo "=== Debug: python --version and which python ==="
+      python --version
+      which python || echo "which python failed"
+      echo "=== Debug: pip --version ==="
+      pip --version
+      echo "=== End debug ==="
+      # Now proceed with normal install:
+      pip install --upgrade pip setuptools wheel
+      pip install -r requirements.txt
     startCommand: gunicorn app:app
     autoDeploy: true
